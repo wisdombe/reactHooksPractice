@@ -1,4 +1,6 @@
 import { useReducer } from "react";
+import TodoList from "./TodoList";
+import useFilteredTodos from "./UseMemo";
 
 const UseReducerHook2 = () => {
   function reducer(state, action) {
@@ -6,17 +8,23 @@ const UseReducerHook2 = () => {
       case "add_todo": {
         return {
           ...state,
-          todo: state.newTodo,
+          todos: [
+            {
+              id: state.todos.length + 1,
+              text: state.newTodo,
+              completed: false,
+            },
+          ],
           newTodo: "",
         };
       }
       case "add_new_todo": {
         return {
           ...state,
-          newTodo: action.payLoad,
+          newTodo: action.payload,
         };
       }
-      case "chage_theme": {
+      case "change_theme": {
         return {
           isDark: !state.isDark,
         };
@@ -36,26 +44,43 @@ const UseReducerHook2 = () => {
           tab: "completed",
         };
       }
+      case "toggle_todo": {
+        return {
+          todos: state.todos.map((todo) =>
+            todo.id === action.id
+              ? { ...todo, completed: !todo.completed }
+              : todo
+          ),
+        };
+      }
     }
     throw new Error("unknown error");
   }
 
-  const initialState = { todo: "go to school", isDark: false };
+  const initialState = { todo: [], newTodo: "", isDark: false, tab: "All" };
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch({ type: "add_todo" });
+    if (state.newTodo.trim()) {
+      dispatch({ type: "add_todo" });
+    }
   };
 
-  const AddTodo = (e) => {
+  const handleInputChange = (e) => {
     dispatch({
       type: "add_new_todo",
       payLoad: e.target.value,
     });
   };
+  const filteredTodos = useFilteredTodos(state.todos, state.tab);
   return (
-    <div>
+    <div
+      style={{
+        background: state.isDark ? "#333" : "#fff",
+        color: state.isDark ? "#fff" : "#333",
+      }}
+    >
       <h1>todo App</h1>
       <button onClick={() => dispatch({ type: "set_tab_All" })}>all</button>
       <button onClick={() => dispatch({ type: "set_tab_Active" })}>
@@ -67,21 +92,30 @@ const UseReducerHook2 = () => {
 
       <form>
         <label htmlFor="theme">
-          <input type="checkbox" checked={dispatch({ type: "change_theme" })} />
+          <input
+            type="checkbox"
+            checked={state.isDark}
+            onChange={() => dispatch({ type: "change_theme" })}
+          />
+          theme
         </label>
         <label htmlFor="addTodo">
           <input
             type="text"
             id="addTodo"
             placeholder="Add todo"
-            onChange={AddTodo}
+            value={state.newTodo}
+            onChange={handleInputChange}
           />
         </label>
         <button type="submit" onClick={handleSubmit}>
           submit
         </button>
       </form>
-      <p>{state.todo}</p>
+      <TodoList
+        todos={filteredTodos}
+        onToggle={(id) => dispatch({ type: "toggle_todo", id })}
+      />
     </div>
   );
 };

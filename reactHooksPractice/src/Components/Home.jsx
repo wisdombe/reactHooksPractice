@@ -7,6 +7,7 @@ const Home = () => {
       <Link to="/UseReducer">UseReducerHOok</Link>
       <Link to="/UseMemo">UseReducerHOok</Link>
       <Link to="/UseRef">UseRef</Link>
+      <Link to="/UseReducer2">Todo List</Link>
     </div>
   );
 };

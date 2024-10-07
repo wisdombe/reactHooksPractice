@@ -12,7 +12,7 @@ export function createTodos() {
 }
 
 export function filterTodos(Todos, tab) {
-  Todos.filter((todo) => {
+  return Todos.filter((todo) => {
     if (tab === "All") {
       return true;
     } else if (tab === "Active") {
